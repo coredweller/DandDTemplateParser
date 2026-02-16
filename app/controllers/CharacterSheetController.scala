@@ -1,7 +1,7 @@
 package controllers
 
 import cats.effect.unsafe.IORuntime
-import domain.CharacterSheet
+import domain.{CharacterSheet, LegendaryCharacterSheet}
 import play.api.libs.json.*
 import play.api.mvc.*
 import services.CharacterSheetRenderer
@@ -20,6 +20,16 @@ final class CharacterSheetController(
         Future.successful(BadRequest(Json.obj("error" -> JsError.toJson(errors))))
       case JsSuccess(sheet, _) =>
         renderer.renderHtml(sheet)
+          .map(html => Ok(html).as(HTML))
+          .unsafeToFuture()
+  }
+
+  def renderLegendaryCharacterSheet: Action[JsValue] = Action.async(parse.json) { request =>
+    request.body.validate[LegendaryCharacterSheet] match
+      case JsError(errors) =>
+        Future.successful(BadRequest(Json.obj("error" -> JsError.toJson(errors))))
+      case JsSuccess(sheet, _) =>
+        renderer.renderLegendaryHtml(sheet)
           .map(html => Ok(html).as(HTML))
           .unsafeToFuture()
   }

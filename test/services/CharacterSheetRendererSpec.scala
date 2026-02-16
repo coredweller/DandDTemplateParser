@@ -122,7 +122,7 @@ class CharacterSheetRendererSpec extends AsyncWordSpec with AsyncIOSpec with Mat
       IO.pure(parsed).asserting(_ shouldBe sampleSheet)
     }
 
-    "parse the blank template structure" in {
+    "parse the blank general template structure" in {
       val templateJson = Json.parse(
         """{
           |  "CharacterName": "",
@@ -157,5 +157,199 @@ class CharacterSheetRendererSpec extends AsyncWordSpec with AsyncIOSpec with Mat
       )
       val sheet = templateJson.as[CharacterSheet]
       IO.pure(sheet.CharacterName).asserting(_ shouldBe "")
+    }
+  }
+
+  // ── Legendary Character Sheet ────────────────────────────────
+
+  private val sampleLegendary = LegendaryCharacterSheet(
+    CharacterName       = "Tiamat, Queen of Dragons",
+    Level               = 30,
+    Race                = "Dragon God",
+    Class               = "Deity",
+    Alignment           = "Chaotic Evil",
+    HP                  = "615 (30d20+300)",
+    AC                  = 25,
+    Speed               = "60 ft., fly 120 ft.",
+    AbilityScores       = AbilityScores(
+      Strength     = AbilityScore(30, "+10"),
+      Dexterity    = AbilityScore(10, "+0"),
+      Constitution = AbilityScore(30, "+10"),
+      Intelligence = AbilityScore(26, "+8"),
+      Wisdom       = AbilityScore(26, "+8"),
+      Charisma     = AbilityScore(28, "+9")
+    ),
+    SavingThrows        = Map("STR" -> "+19", "DEX" -> "+9", "WIS" -> "+17"),
+    Skills              = Map("Arcana" -> "+17", "Perception" -> "+26", "Religion" -> "+17"),
+    DamageResistances   = "bludgeoning, piercing, slashing from nonmagical attacks",
+    DamageImmunities    = "acid, cold, fire, lightning, poison",
+    ConditionImmunities = "blinded, charmed, frightened, poisoned, stunned",
+    Senses              = "darkvision 240 ft., truesight 120 ft., passive Perception 36",
+    Languages           = "Common, Draconic, Infernal, telepathy 120 ft.",
+    ChallengeRating     = "30",
+    ProficiencyBonus    = "+9",
+    SpecialTraits       = Map("Legendary Resistance (5/Day)" -> "If Tiamat fails a saving throw, she can choose to succeed instead."),
+    Actions             = Map("Bite" -> "+19 to hit, 4d6+10 piercing plus 4d6 acid"),
+    BonusActions        = Map("Chromatic Surge" -> "Exhale a burst of elemental energy"),
+    Reactions           = Map("Reactive Heads" -> "Tiamat can take up to five reactions per round"),
+    LegendaryTraits     = Map("Legendary Resistance (5/Day)" -> "Choose to succeed a failed saving throw"),
+    LegendaryActions    = LegendaryActions(
+      legendaryActionUses = "5",
+      Options = Map("Bite Attack" -> "Tiamat makes a bite attack", "Wing Attack (2)" -> "Tiamat beats her wings")
+    ),
+    MythicTrait         = MythicTrait("Chromatic Rebirth", "When Tiamat is reduced to 0 HP, she regains all HP and each head ignites."),
+    LairActions         = Map("Magma Eruption" -> "Magma erupts from the ground in a 20-foot radius"),
+    RegionalEffects     = List("Draconic storms of acid, lightning, and fire rage within 6 miles", "Creatures within 1 mile feel an overwhelming sense of dread"),
+    Equipment           = Equipment(Armor = "Natural Armor", Weapons = "Five Chromatic Heads", Other = "—"),
+    Notes               = "The five-headed queen of evil dragonkind"
+  )
+
+  "CharacterSheetRenderer.renderLegendaryHtml" should {
+    "produce valid HTML with legendary styling" in {
+      renderer.renderLegendaryHtml(sampleLegendary).asserting { html =>
+        html should include("Tiamat, Queen of Dragons")
+        html should include("<!DOCTYPE html>")
+        html should include("legendary")
+      }
+    }
+
+    "include challenge rating and proficiency bonus" in {
+      renderer.renderLegendaryHtml(sampleLegendary).asserting { html =>
+        html should include("CR 30")
+        html should include("Prof +9")
+      }
+    }
+
+    "include defenses section" in {
+      renderer.renderLegendaryHtml(sampleLegendary).asserting { html =>
+        html should include("Damage Resistances")
+        html should include("Damage Immunities")
+        html should include("Condition Immunities")
+        html should include("acid, cold, fire, lightning, poison")
+      }
+    }
+
+    "include bonus actions and reactions" in {
+      renderer.renderLegendaryHtml(sampleLegendary).asserting { html =>
+        html should include("Bonus Actions")
+        html should include("Chromatic Surge")
+        html should include("Reactions")
+        html should include("Reactive Heads")
+      }
+    }
+
+    "include legendary traits and actions" in {
+      renderer.renderLegendaryHtml(sampleLegendary).asserting { html =>
+        html should include("Legendary Traits")
+        html should include("Legendary Actions")
+        html should include("5 legendary action uses per round")
+        html should include("Bite Attack")
+        html should include("Wing Attack (2)")
+      }
+    }
+
+    "include mythic trait" in {
+      renderer.renderLegendaryHtml(sampleLegendary).asserting { html =>
+        html should include("Mythic Trait")
+        html should include("Chromatic Rebirth")
+        html should include("regains all HP")
+      }
+    }
+
+    "include lair actions and regional effects" in {
+      renderer.renderLegendaryHtml(sampleLegendary).asserting { html =>
+        html should include("Lair Actions")
+        html should include("Magma Eruption")
+        html should include("Regional Effects")
+        html should include("Draconic storms of acid")
+      }
+    }
+
+    "omit mythic trait when empty" in {
+      val noMythic = sampleLegendary.copy(MythicTrait = MythicTrait("", ""))
+      renderer.renderLegendaryHtml(noMythic).asserting { html =>
+        html should not include "Mythic Trait"
+      }
+    }
+
+    "show dash for empty defense fields" in {
+      val noDefenses = sampleLegendary.copy(
+        DamageResistances = "",
+        DamageImmunities = "",
+        ConditionImmunities = ""
+      )
+      renderer.renderLegendaryHtml(noDefenses).asserting { html =>
+        // empty fields render as "—"
+        html should include("—")
+      }
+    }
+  }
+
+  "LegendaryCharacterSheet JSON format" should {
+    "round-trip through JSON" in {
+      val json   = Json.toJson(sampleLegendary)
+      val parsed = json.as[LegendaryCharacterSheet]
+      IO.pure(parsed).asserting(_ shouldBe sampleLegendary)
+    }
+
+    "parse the blank legendary template structure" in {
+      val templateJson = Json.parse(
+        """{
+          |  "CharacterName": "",
+          |  "Level": 0,
+          |  "Race": "",
+          |  "Class": "",
+          |  "Alignment": "",
+          |  "HP": "",
+          |  "AC": 0,
+          |  "Speed": "",
+          |  "AbilityScores": {
+          |    "Strength": { "Score": 0, "Modifier": "+0" },
+          |    "Dexterity": { "Score": 0, "Modifier": "+0" },
+          |    "Constitution": { "Score": 0, "Modifier": "+0" },
+          |    "Intelligence": { "Score": 0, "Modifier": "+0" },
+          |    "Wisdom": { "Score": 0, "Modifier": "+0" },
+          |    "Charisma": { "Score": 0, "Modifier": "+0" }
+          |  },
+          |  "SavingThrows": {},
+          |  "Skills": {},
+          |  "DamageResistances": "",
+          |  "DamageImmunities": "",
+          |  "ConditionImmunities": "",
+          |  "Senses": "",
+          |  "Languages": "",
+          |  "ChallengeRating": "",
+          |  "ProficiencyBonus": "",
+          |  "SpecialTraits": {},
+          |  "Actions": {},
+          |  "BonusActions": {},
+          |  "Reactions": {},
+          |  "LegendaryTraits": {
+          |    "Legendary Resistance (3/Day)": ""
+          |  },
+          |  "LegendaryActions": {
+          |    "Legendary Action Uses": "3",
+          |    "Options": {
+          |      "Option1": "",
+          |      "Option2": "",
+          |      "Option3": ""
+          |    }
+          |  },
+          |  "MythicTrait": {
+          |    "Name": "",
+          |    "Description": ""
+          |  },
+          |  "LairActions": {},
+          |  "RegionalEffects": [],
+          |  "Equipment": {
+          |    "Armor": "",
+          |    "Weapons": "",
+          |    "Other": ""
+          |  },
+          |  "Notes": ""
+          |}""".stripMargin
+      )
+      val sheet = templateJson.as[LegendaryCharacterSheet]
+      IO.pure(sheet.LegendaryActions.legendaryActionUses).asserting(_ shouldBe "3")
     }
   }
