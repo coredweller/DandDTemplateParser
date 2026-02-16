@@ -25,7 +25,6 @@ lazy val root = (project in file("."))
       "-Wunused:imports",
       "-Wunused:privates",
       "-Wunused:locals",
-      "-Wunused:params",
     ),
 
     // Suppress warnings in Play-generated routes sources

@@ -7,12 +7,12 @@ import play.api.libs.json.*
 import play.api.mvc.*
 import services.TaskService
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 final class TaskController(
   service: TaskService,
   cc:      ControllerComponents
-)(using runtime: IORuntime)
+)(using runtime: IORuntime, ec: ExecutionContext)
     extends AbstractController(cc):
 
   // ── Helper: IO[Either[TaskError, A]] → Future[Result] ─────
