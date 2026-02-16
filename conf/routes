@@ -1,0 +1,4 @@
+GET    /api/v1/health       controllers.HealthController.check
+GET    /api/v1/tasks        controllers.TaskController.list
+POST   /api/v1/tasks        controllers.TaskController.create
+GET    /api/v1/tasks/:id    controllers.TaskController.findById(id: String)

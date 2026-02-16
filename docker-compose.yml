@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    ports:
+      - "9000:9000"
+    environment:
+      APP_SECRET: "local-dev-secret-change-me"
+      APP_HOST: "localhost"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9000/api/v1/health"]
+      interval: 10s
+      retries: 3

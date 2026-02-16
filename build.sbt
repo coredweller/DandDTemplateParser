@@ -1,0 +1,36 @@
+ThisBuild / scalaVersion := "3.3.4"
+ThisBuild / organization := "com.company"
+ThisBuild / version      := "0.1.0-SNAPSHOT"
+
+lazy val root = (project in file("."))
+  .enablePlugins(PlayScala)
+  .settings(
+    name := "dand-d-template-parser",
+
+    // ── Dependencies ───────────────────────────────────────────
+    libraryDependencies ++= Seq(
+      "org.typelevel"  %% "cats-core"                       % "2.12.0",
+      "org.typelevel"  %% "cats-effect"                     % "3.5.4",
+      "co.fs2"         %% "fs2-core"                        % "3.11.0",
+      "io.github.iltotore" %% "iron"                        % "2.6.0",
+      "io.github.iltotore" %% "iron-cats"                   % "2.6.0",
+      // Testing
+      "org.scalatestplus.play" %% "scalatestplus-play"       % "7.0.1"  % Test,
+      "org.typelevel"  %% "cats-effect-testing-scalatest"    % "1.5.0"  % Test,
+    ),
+
+    // ── Compiler options ───────────────────────────────────────
+    scalacOptions ++= Seq(
+      "-Xfatal-warnings",
+      "-Wunused:imports",
+      "-Wunused:privates",
+      "-Wunused:locals",
+      "-Wunused:params",
+    ),
+
+    // Suppress warnings in Play-generated routes sources
+    scalacOptions += "-Wconf:src=routes/.*:s",
+
+    // ── Play settings ──────────────────────────────────────────
+    PlayKeys.playDefaultPort := 9000,
+  )
