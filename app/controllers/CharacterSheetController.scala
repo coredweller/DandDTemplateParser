@@ -4,13 +4,13 @@ import cats.effect.unsafe.IORuntime
 import domain.{CharacterSheet, LegendaryCharacterSheet}
 import play.api.libs.json.*
 import play.api.mvc.*
-import services.CharacterSheetRenderer
+import services.CharacterSheetService
 
 import scala.concurrent.{ExecutionContext, Future}
 
 final class CharacterSheetController(
-  renderer: CharacterSheetRenderer,
-  cc:       ControllerComponents
+  service: CharacterSheetService,
+  cc:      ControllerComponents
 )(using runtime: IORuntime, ec: ExecutionContext)
     extends AbstractController(cc):
 
@@ -19,7 +19,7 @@ final class CharacterSheetController(
       case JsError(errors) =>
         Future.successful(BadRequest(Json.obj("error" -> JsError.toJson(errors))))
       case JsSuccess(sheet, _) =>
-        renderer.renderHtml(sheet)
+        service.renderGeneral(sheet, request.body.toString)
           .map(html => Ok(html).as(HTML))
           .unsafeToFuture()
   }
@@ -29,7 +29,7 @@ final class CharacterSheetController(
       case JsError(errors) =>
         Future.successful(BadRequest(Json.obj("error" -> JsError.toJson(errors))))
       case JsSuccess(sheet, _) =>
-        renderer.renderLegendaryHtml(sheet)
+        service.renderLegendary(sheet, request.body.toString)
           .map(html => Ok(html).as(HTML))
           .unsafeToFuture()
   }

@@ -14,6 +14,10 @@ lazy val root = (project in file("."))
       "co.fs2"         %% "fs2-core"                        % "3.11.0",
       "io.github.iltotore" %% "iron"                        % "2.6.0",
       "io.github.iltotore" %% "iron-cats"                   % "2.6.0",
+      // Database
+      "org.tpolecat"       %% "doobie-core"                  % "1.0.0-RC6",
+      "org.tpolecat"       %% "doobie-hikari"                % "1.0.0-RC6",
+      "com.mysql"           % "mysql-connector-j"            % "9.2.0",
       // Testing
       "org.scalatestplus.play" %% "scalatestplus-play"       % "7.0.1"  % Test,
       "org.typelevel"  %% "cats-effect-testing-scalatest"    % "1.5.0"  % Test,
