@@ -1,7 +1,7 @@
 package controllers
 
 import cats.effect.unsafe.IORuntime
-import domain.{CharacterSheet, LegendaryCharacterSheet}
+import domain.{CharacterSheet, LegendaryCharacterSheet, RenderSummary}
 import play.api.libs.json.*
 import play.api.mvc.*
 import services.CharacterSheetService
@@ -32,4 +32,10 @@ final class CharacterSheetController(
         service.renderLegendary(sheet, request.body.toString)
           .map(html => Ok(html).as(HTML))
           .unsafeToFuture()
+  }
+
+  def findByLevel(level: Int): Action[AnyContent] = Action.async {
+    service.findByLevel(level)
+      .map(summaries => Ok(Json.toJson(summaries)))
+      .unsafeToFuture()
   }

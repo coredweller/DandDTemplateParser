@@ -1,7 +1,8 @@
 package services
 
 import cats.effect.IO
-import domain.{RenderId, RenderRecord, SheetType}
+import domain.{RenderId, RenderRecord, RenderSummary, SheetType}
+import domain.RenderRecord.toSummary
 import repositories.RenderRepository
 
 import java.time.Instant
@@ -31,3 +32,6 @@ final class RenderService(repo: RenderRepository):
       createdAt     = now
     )
     repo.save(record)
+
+  def findByLevel(level: Int): IO[List[RenderSummary]] =
+    repo.findByLevel(level).map(_.map(_.toSummary))

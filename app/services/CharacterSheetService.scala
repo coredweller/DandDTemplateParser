@@ -1,7 +1,7 @@
 package services
 
 import cats.effect.IO
-import domain.{CharacterSheet, LegendaryCharacterSheet, SheetType}
+import domain.{CharacterSheet, LegendaryCharacterSheet, RenderSummary, SheetType}
 
 final class CharacterSheetService(
   renderer:      CharacterSheetRenderer,
@@ -19,3 +19,6 @@ final class CharacterSheetService(
       html <- renderer.renderLegendaryHtml(sheet)
       _    <- renderService.saveRender(SheetType.Legendary, sheet.CharacterName, sheet.Level, requestJson, html)
     yield html
+
+  def findByLevel(level: Int): IO[List[RenderSummary]] =
+    renderService.findByLevel(level)
