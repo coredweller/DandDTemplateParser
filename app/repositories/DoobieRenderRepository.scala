@@ -25,6 +25,14 @@ final class DoobieRenderRepository(xa: Transactor[IO]) extends RenderRepository:
   private given Meta[Instant] =
     Meta[java.sql.Timestamp].imap(_.toInstant)(java.sql.Timestamp.from)
 
+  def findBySheetType(sheetType: SheetType): IO[List[RenderRecord]] =
+    sql"""SELECT id, name, sheet_type, character_name, level, request_json, response_html, created_at
+         |FROM character_sheet_renders
+         |WHERE sheet_type = $sheetType
+         |ORDER BY created_at DESC
+         """.stripMargin.query[RenderRecord].to[List]
+      .transact(xa)
+
   def findByLevel(level: Int): IO[List[RenderRecord]] =
     sql"""SELECT id, name, sheet_type, character_name, level, request_json, response_html, created_at
          |FROM character_sheet_renders

@@ -22,3 +22,6 @@ final class CharacterSheetService(
 
   def findByLevel(level: Int): IO[List[RenderSummary]] =
     renderService.findByLevel(level)
+
+  def findBySheetType(sheetType: SheetType): IO[List[RenderSummary]] =
+    renderService.findBySheetType(sheetType)

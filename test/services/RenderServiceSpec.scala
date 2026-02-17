@@ -15,6 +15,8 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
       store.update(record :: _).as(record)
     def findByLevel(level: Int): IO[List[RenderRecord]] =
       store.get.map(_.filter(_.level == level))
+    def findBySheetType(sheetType: SheetType): IO[List[RenderRecord]] =
+      store.get.map(_.filter(_.sheetType == sheetType))
 
   private def makeService: IO[(RenderService, Ref[IO, List[RenderRecord]])] =
     Ref.of[IO, List[RenderRecord]](Nil).map { store =>
@@ -96,6 +98,35 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
         for
           _       <- service.saveRender(SheetType.General, "Thorn", 5, "{}", "<html/>")
           results <- service.findByLevel(99)
+        yield results
+      }.asserting { results =>
+        results shouldBe empty
+      }
+    }
+  }
+
+  "RenderService.findBySheetType" should {
+    "return only records matching the sheet type" in {
+      makeService.flatMap { (service, _) =>
+        for
+          _       <- service.saveRender(SheetType.General, "Thorn", 5, "{}", "<html>thorn</html>")
+          _       <- service.saveRender(SheetType.Legendary, "Tiamat", 30, "{}", "<html>tiamat</html>")
+          _       <- service.saveRender(SheetType.General, "Gimli", 8, "{}", "<html>gimli</html>")
+          results <- service.findBySheetType(SheetType.General)
+        yield results
+      }.asserting { results =>
+        results should have size 2
+        results.map(_.characterName) should contain allOf ("Thorn", "Gimli")
+        results.map(_.sheetType).distinct shouldBe List(SheetType.General)
+        succeed
+      }
+    }
+
+    "return empty list when no records match" in {
+      makeService.flatMap { (service, _) =>
+        for
+          _       <- service.saveRender(SheetType.General, "Thorn", 5, "{}", "<html/>")
+          results <- service.findBySheetType(SheetType.Legendary)
         yield results
       }.asserting { results =>
         results shouldBe empty

@@ -4,4 +4,5 @@ POST   /api/v1/tasks        controllers.TaskController.create
 GET    /api/v1/tasks/:id    controllers.TaskController.findById(id: String)
 POST   /api/v1/character/render            controllers.CharacterSheetController.renderGeneralCharacterSheet
 POST   /api/v1/character/legendary/render  controllers.CharacterSheetController.renderLegendaryCharacterSheet
-GET    /api/v1/character/renders/level/:level  controllers.CharacterSheetController.findByLevel(level: Int)
+GET    /api/v1/character/renders/level/:level      controllers.CharacterSheetController.findByLevel(level: Int)
+GET    /api/v1/character/renders/type/:sheetType  controllers.CharacterSheetController.findBySheetType(sheetType: String)

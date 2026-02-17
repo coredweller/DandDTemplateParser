@@ -1,7 +1,7 @@
 package controllers
 
 import cats.effect.unsafe.IORuntime
-import domain.{CharacterSheet, LegendaryCharacterSheet, RenderSummary}
+import domain.{CharacterSheet, LegendaryCharacterSheet, RenderSummary, SheetType}
 import play.api.libs.json.*
 import play.api.mvc.*
 import services.CharacterSheetService
@@ -38,4 +38,14 @@ final class CharacterSheetController(
     service.findByLevel(level)
       .map(summaries => Ok(Json.toJson(summaries)))
       .unsafeToFuture()
+  }
+
+  def findBySheetType(sheetType: String): Action[AnyContent] = Action.async {
+    SheetType.fromString(sheetType) match
+      case Left(err) =>
+        Future.successful(BadRequest(Json.obj("error" -> err)))
+      case Right(st) =>
+        service.findBySheetType(st)
+          .map(summaries => Ok(Json.toJson(summaries)))
+          .unsafeToFuture()
   }

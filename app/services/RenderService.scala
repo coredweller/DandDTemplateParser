@@ -35,3 +35,6 @@ final class RenderService(repo: RenderRepository):
 
   def findByLevel(level: Int): IO[List[RenderSummary]] =
     repo.findByLevel(level).map(_.map(_.toSummary))
+
+  def findBySheetType(sheetType: SheetType): IO[List[RenderSummary]] =
+    repo.findBySheetType(sheetType).map(_.map(_.toSummary))
