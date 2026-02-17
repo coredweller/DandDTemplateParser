@@ -6,3 +6,4 @@ POST   /api/v1/character/render            controllers.CharacterSheetController.
 POST   /api/v1/character/legendary/render  controllers.CharacterSheetController.renderLegendaryCharacterSheet
 GET    /api/v1/character/renders/level/:level      controllers.CharacterSheetController.findByLevel(level: Int)
 GET    /api/v1/character/renders/type/:sheetType  controllers.CharacterSheetController.findBySheetType(sheetType: String)
+POST   /api/v1/character/renders/search           controllers.CharacterSheetController.searchByCharacterName

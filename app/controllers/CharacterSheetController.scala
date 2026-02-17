@@ -49,3 +49,13 @@ final class CharacterSheetController(
           .map(summaries => Ok(Json.toJson(summaries)))
           .unsafeToFuture()
   }
+
+  def searchByCharacterName: Action[JsValue] = Action.async(parse.json) { request =>
+    (request.body \ "name").validate[String] match
+      case JsError(errors) =>
+        Future.successful(BadRequest(Json.obj("error" -> JsError.toJson(errors))))
+      case JsSuccess(name, _) =>
+        service.searchByCharacterName(name)
+          .map(summaries => Ok(Json.toJson(summaries)))
+          .unsafeToFuture()
+  }

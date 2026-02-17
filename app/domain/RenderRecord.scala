@@ -50,7 +50,6 @@ object SheetType:
 // ── Render Record ────────────────────────────────────────────
 case class RenderRecord(
   id:            RenderId,
-  name:          String,
   sheetType:     SheetType,
   characterName: String,
   level:         Int,
@@ -65,7 +64,6 @@ object RenderRecord:
   extension (r: RenderRecord)
     def toSummary: RenderSummary = RenderSummary(
       id            = r.id,
-      name          = r.name,
       sheetType     = r.sheetType,
       characterName = r.characterName,
       level         = r.level,
@@ -76,7 +74,6 @@ object RenderRecord:
 // ── Render Summary (excludes requestJson) ────────────────────
 case class RenderSummary(
   id:            RenderId,
-  name:          String,
   sheetType:     SheetType,
   characterName: String,
   level:         Int,

@@ -25,8 +25,17 @@ final class DoobieRenderRepository(xa: Transactor[IO]) extends RenderRepository:
   private given Meta[Instant] =
     Meta[java.sql.Timestamp].imap(_.toInstant)(java.sql.Timestamp.from)
 
+  def searchByCharacterName(query: String): IO[List[RenderRecord]] =
+    val pattern = s"%$query%"
+    sql"""SELECT id, sheet_type, character_name, level, request_json, response_html, created_at
+         |FROM character_sheet_renders
+         |WHERE character_name LIKE $pattern
+         |ORDER BY created_at DESC
+         """.stripMargin.query[RenderRecord].to[List]
+      .transact(xa)
+
   def findBySheetType(sheetType: SheetType): IO[List[RenderRecord]] =
-    sql"""SELECT id, name, sheet_type, character_name, level, request_json, response_html, created_at
+    sql"""SELECT id, sheet_type, character_name, level, request_json, response_html, created_at
          |FROM character_sheet_renders
          |WHERE sheet_type = $sheetType
          |ORDER BY created_at DESC
@@ -34,7 +43,7 @@ final class DoobieRenderRepository(xa: Transactor[IO]) extends RenderRepository:
       .transact(xa)
 
   def findByLevel(level: Int): IO[List[RenderRecord]] =
-    sql"""SELECT id, name, sheet_type, character_name, level, request_json, response_html, created_at
+    sql"""SELECT id, sheet_type, character_name, level, request_json, response_html, created_at
          |FROM character_sheet_renders
          |WHERE level = $level
          |ORDER BY created_at DESC
@@ -43,9 +52,9 @@ final class DoobieRenderRepository(xa: Transactor[IO]) extends RenderRepository:
 
   def save(record: RenderRecord): IO[RenderRecord] =
     sql"""INSERT INTO character_sheet_renders
-         |  (id, name, sheet_type, character_name, level, request_json, response_html, created_at)
+         |  (id, sheet_type, character_name, level, request_json, response_html, created_at)
          |VALUES
-         |  (${record.id}, ${record.name}, ${record.sheetType}, ${record.characterName},
+         |  (${record.id}, ${record.sheetType}, ${record.characterName},
          |   ${record.level}, ${record.requestJson}, ${record.responseHtml}, ${record.createdAt})
          """.stripMargin.update.run
       .transact(xa)

@@ -17,6 +17,8 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
       store.get.map(_.filter(_.level == level))
     def findBySheetType(sheetType: SheetType): IO[List[RenderRecord]] =
       store.get.map(_.filter(_.sheetType == sheetType))
+    def searchByCharacterName(query: String): IO[List[RenderRecord]] =
+      store.get.map(_.filter(_.characterName.toLowerCase.contains(query.toLowerCase)))
 
   private def makeService: IO[(RenderService, Ref[IO, List[RenderRecord]])] =
     Ref.of[IO, List[RenderRecord]](Nil).map { store =>
@@ -34,8 +36,6 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
               r.level         shouldBe 5
               r.requestJson   shouldBe """{"CharacterName":"Thorn"}"""
               r.responseHtml  shouldBe "<html>test</html>"
-              r.name          should include("Thorn Ironforge")
-              r.name          should include("general")
             }
           }
       }
@@ -65,14 +65,6 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
       }
     }
 
-    "include timestamp in the name" in {
-      makeService.flatMap { (service, _) =>
-        service.saveRender(SheetType.General, "Test", 3, "{}", "<html/>")
-      }.asserting { record =>
-        // name format: "{characterName} - {sheetType} - {yyyy-MM-dd HH:mm:ss}"
-        record.name should fullyMatch regex """Test - general - \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"""
-      }
-    }
   }
 
   "RenderService.findByLevel" should {
@@ -127,6 +119,46 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
         for
           _       <- service.saveRender(SheetType.General, "Thorn", 5, "{}", "<html/>")
           results <- service.findBySheetType(SheetType.Legendary)
+        yield results
+      }.asserting { results =>
+        results shouldBe empty
+      }
+    }
+  }
+
+  "RenderService.searchByCharacterName" should {
+    "return records with partial name match" in {
+      makeService.flatMap { (service, _) =>
+        for
+          _       <- service.saveRender(SheetType.General, "Ogre Warchief", 8, "{}", "<html/>")
+          _       <- service.saveRender(SheetType.Legendary, "Tiamat", 30, "{}", "<html/>")
+          _       <- service.saveRender(SheetType.General, "Young Ogre", 3, "{}", "<html/>")
+          results <- service.searchByCharacterName("Ogre")
+        yield results
+      }.asserting { results =>
+        results should have size 2
+        results.map(_.characterName) should contain allOf ("Ogre Warchief", "Young Ogre")
+        succeed
+      }
+    }
+
+    "be case-insensitive" in {
+      makeService.flatMap { (service, _) =>
+        for
+          _       <- service.saveRender(SheetType.General, "Ogre Warchief", 8, "{}", "<html/>")
+          results <- service.searchByCharacterName("ogre")
+        yield results
+      }.asserting { results =>
+        results should have size 1
+        results.head.characterName shouldBe "Ogre Warchief"
+      }
+    }
+
+    "return empty list when no names match" in {
+      makeService.flatMap { (service, _) =>
+        for
+          _       <- service.saveRender(SheetType.General, "Thorn", 5, "{}", "<html/>")
+          results <- service.searchByCharacterName("Dragon")
         yield results
       }.asserting { results =>
         results shouldBe empty

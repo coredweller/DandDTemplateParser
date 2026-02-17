@@ -25,3 +25,6 @@ final class CharacterSheetService(
 
   def findBySheetType(sheetType: SheetType): IO[List[RenderSummary]] =
     renderService.findBySheetType(sheetType)
+
+  def searchByCharacterName(query: String): IO[List[RenderSummary]] =
+    renderService.searchByCharacterName(query)

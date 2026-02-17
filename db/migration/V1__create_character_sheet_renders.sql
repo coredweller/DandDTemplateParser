@@ -1,6 +1,5 @@
 CREATE TABLE character_sheet_renders (
   id              VARCHAR(36)  NOT NULL PRIMARY KEY,
-  name            VARCHAR(255) NOT NULL,
   sheet_type      VARCHAR(20)  NOT NULL,
   character_name  VARCHAR(255) NOT NULL,
   level           INT          NOT NULL,
