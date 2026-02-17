@@ -22,11 +22,12 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
   "RenderService.saveRender" should {
     "create a record with correct fields" in {
       makeService.flatMap { (service, _) =>
-        service.saveRender(SheetType.General, "Thorn Ironforge", """{"CharacterName":"Thorn"}""", "<html>test</html>")
+        service.saveRender(SheetType.General, "Thorn Ironforge", 5, """{"CharacterName":"Thorn"}""", "<html>test</html>")
           .flatMap { record =>
             IO.pure(record).asserting { r =>
               r.sheetType     shouldBe SheetType.General
               r.characterName shouldBe "Thorn Ironforge"
+              r.level         shouldBe 5
               r.requestJson   shouldBe """{"CharacterName":"Thorn"}"""
               r.responseHtml  shouldBe "<html>test</html>"
               r.name          should include("Thorn Ironforge")
@@ -39,8 +40,8 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
     "generate a unique id for each record" in {
       makeService.flatMap { (service, _) =>
         for
-          r1 <- service.saveRender(SheetType.General, "A", "{}", "<html/>")
-          r2 <- service.saveRender(SheetType.Legendary, "B", "{}", "<html/>")
+          r1 <- service.saveRender(SheetType.General, "A", 1, "{}", "<html/>")
+          r2 <- service.saveRender(SheetType.Legendary, "B", 10, "{}", "<html/>")
         yield (r1, r2)
       }.asserting { (r1, r2) =>
         r1.id should not be r2.id
@@ -50,7 +51,7 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
     "persist the record to the repository" in {
       makeService.flatMap { (service, store) =>
         for
-          _     <- service.saveRender(SheetType.Legendary, "Tiamat", "{}", "<html/>")
+          _     <- service.saveRender(SheetType.Legendary, "Tiamat", 30, "{}", "<html/>")
           saved <- store.get
         yield saved
       }.asserting { saved =>
@@ -62,7 +63,7 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
 
     "include timestamp in the name" in {
       makeService.flatMap { (service, _) =>
-        service.saveRender(SheetType.General, "Test", "{}", "<html/>")
+        service.saveRender(SheetType.General, "Test", 3, "{}", "<html/>")
       }.asserting { record =>
         // name format: "{characterName} - {sheetType} - {yyyy-MM-dd HH:mm:ss}"
         record.name should fullyMatch regex """Test - general - \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"""

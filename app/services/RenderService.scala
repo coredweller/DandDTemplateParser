@@ -14,6 +14,7 @@ final class RenderService(repo: RenderRepository):
   def saveRender(
     sheetType:     SheetType,
     characterName: String,
+    level:         Int,
     requestJson:   String,
     responseHtml:  String
   ): IO[RenderRecord] =
@@ -24,6 +25,7 @@ final class RenderService(repo: RenderRepository):
       name          = name,
       sheetType     = sheetType,
       characterName = characterName,
+      level         = level,
       requestJson   = requestJson,
       responseHtml  = responseHtml,
       createdAt     = now

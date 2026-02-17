@@ -53,6 +53,7 @@ case class RenderRecord(
   name:          String,
   sheetType:     SheetType,
   characterName: String,
+  level:         Int,
   requestJson:   String,
   responseHtml:  String,
   createdAt:     Instant

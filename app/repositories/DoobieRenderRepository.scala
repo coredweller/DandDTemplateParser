@@ -27,10 +27,10 @@ final class DoobieRenderRepository(xa: Transactor[IO]) extends RenderRepository:
 
   def save(record: RenderRecord): IO[RenderRecord] =
     sql"""INSERT INTO character_sheet_renders
-         |  (id, name, sheet_type, character_name, request_json, response_html, created_at)
+         |  (id, name, sheet_type, character_name, level, request_json, response_html, created_at)
          |VALUES
          |  (${record.id}, ${record.name}, ${record.sheetType}, ${record.characterName},
-         |   ${record.requestJson}, ${record.responseHtml}, ${record.createdAt})
+         |   ${record.level}, ${record.requestJson}, ${record.responseHtml}, ${record.createdAt})
          """.stripMargin.update.run
       .transact(xa)
       .as(record)
