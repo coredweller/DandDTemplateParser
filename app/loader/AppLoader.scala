@@ -28,14 +28,16 @@ class AppComponents(context: Context)
 
   // ── Database ────────────────────────────────────────────────
   private val dbConfig = configuration.get[play.api.Configuration]("db.default")
-  private val transactor: HikariTransactor[cats.effect.IO] =
+  private val (transactor, closeTransactor) =
     HikariTransactor.newHikariTransactor[cats.effect.IO](
       driverClassName = dbConfig.get[String]("driver"),
       url             = dbConfig.get[String]("url"),
       user            = dbConfig.get[String]("username"),
       pass            = dbConfig.get[String]("password"),
       connectEC       = executionContext
-    ).allocated.unsafeRunSync()._1 //This makes it fail at boot if MySql isnt running. Bad idea? Consider investigating as human
+    ).allocated.unsafeRunSync()
+
+  applicationLifecycle.addStopHook(() => closeTransactor.unsafeToFuture())
 
   // ── Task wiring ─────────────────────────────────────────────
   private val taskRepo: InMemoryTaskRepository =
