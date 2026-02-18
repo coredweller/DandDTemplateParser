@@ -53,33 +53,9 @@ case class RenderRecord(
   sheetType:     SheetType,
   characterName: String,
   level:         Int,
-  requestJson:   String,
   responseHtml:  String,
   createdAt:     Instant
 )
 
 object RenderRecord:
   given OFormat[RenderRecord] = Json.format[RenderRecord]
-
-  extension (r: RenderRecord)
-    def toSummary: RenderSummary = RenderSummary(
-      id            = r.id,
-      sheetType     = r.sheetType,
-      characterName = r.characterName,
-      level         = r.level,
-      responseHtml  = r.responseHtml,
-      createdAt     = r.createdAt
-    )
-
-// ── Render Summary (excludes requestJson) ────────────────────
-case class RenderSummary(
-  id:            RenderId,
-  sheetType:     SheetType,
-  characterName: String,
-  level:         Int,
-  responseHtml:  String,
-  createdAt:     Instant
-)
-
-object RenderSummary:
-  given OFormat[RenderSummary] = Json.format[RenderSummary]

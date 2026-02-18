@@ -1,7 +1,7 @@
 package controllers
 
 import cats.effect.unsafe.IORuntime
-import domain.{CharacterSheet, LegendaryCharacterSheet, RenderSummary, SheetType}
+import domain.{CharacterSheet, LegendaryCharacterSheet, RenderRecord, SheetType}
 import play.api.libs.json.*
 import play.api.mvc.*
 import services.CharacterSheetService
@@ -19,7 +19,7 @@ final class CharacterSheetController(
       case JsError(errors) =>
         Future.successful(BadRequest(Json.obj("error" -> JsError.toJson(errors))))
       case JsSuccess(sheet, _) =>
-        service.renderGeneral(sheet, request.body.toString)
+        service.renderGeneral(sheet)
           .map(html => Ok(html).as(HTML))
           .unsafeToFuture()
   }
@@ -29,7 +29,7 @@ final class CharacterSheetController(
       case JsError(errors) =>
         Future.successful(BadRequest(Json.obj("error" -> JsError.toJson(errors))))
       case JsSuccess(sheet, _) =>
-        service.renderLegendary(sheet, request.body.toString)
+        service.renderLegendary(sheet)
           .map(html => Ok(html).as(HTML))
           .unsafeToFuture()
   }

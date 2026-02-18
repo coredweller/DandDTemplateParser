@@ -3,7 +3,6 @@ CREATE TABLE character_sheet_renders (
   sheet_type      VARCHAR(20)  NOT NULL,
   character_name  VARCHAR(255) NOT NULL,
   level           INT          NOT NULL,
-  request_json    LONGTEXT     NOT NULL,
   response_html   LONGTEXT     NOT NULL,
   created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

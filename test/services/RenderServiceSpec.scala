@@ -28,13 +28,12 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
   "RenderService.saveRender" should {
     "create a record with correct fields" in {
       makeService.flatMap { (service, _) =>
-        service.saveRender(SheetType.General, "Thorn Ironforge", 5, """{"CharacterName":"Thorn"}""", "<html>test</html>")
+        service.saveRender(SheetType.General, "Thorn Ironforge", 5, "<html>test</html>")
           .flatMap { record =>
             IO.pure(record).asserting { r =>
               r.sheetType     shouldBe SheetType.General
               r.characterName shouldBe "Thorn Ironforge"
               r.level         shouldBe 5
-              r.requestJson   shouldBe """{"CharacterName":"Thorn"}"""
               r.responseHtml  shouldBe "<html>test</html>"
             }
           }
@@ -44,8 +43,8 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
     "generate a unique id for each record" in {
       makeService.flatMap { (service, _) =>
         for
-          r1 <- service.saveRender(SheetType.General, "A", 1, "{}", "<html/>")
-          r2 <- service.saveRender(SheetType.Legendary, "B", 10, "{}", "<html/>")
+          r1 <- service.saveRender(SheetType.General, "A", 1, "<html/>")
+          r2 <- service.saveRender(SheetType.Legendary, "B", 10, "<html/>")
         yield (r1, r2)
       }.asserting { (r1, r2) =>
         r1.id should not be r2.id
@@ -55,7 +54,7 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
     "persist the record to the repository" in {
       makeService.flatMap { (service, store) =>
         for
-          _     <- service.saveRender(SheetType.Legendary, "Tiamat", 30, "{}", "<html/>")
+          _     <- service.saveRender(SheetType.Legendary, "Tiamat", 30, "<html/>")
           saved <- store.get
         yield saved
       }.asserting { saved =>
@@ -68,12 +67,12 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
   }
 
   "RenderService.findByLevel" should {
-    "return matching records as summaries without requestJson" in {
+    "return matching records" in {
       makeService.flatMap { (service, _) =>
         for
-          _        <- service.saveRender(SheetType.General, "Thorn", 5, """{"big":"json"}""", "<html>thorn</html>")
-          _        <- service.saveRender(SheetType.Legendary, "Tiamat", 30, "{}", "<html>tiamat</html>")
-          _        <- service.saveRender(SheetType.General, "Gimli", 5, """{"other":"data"}""", "<html>gimli</html>")
+          _        <- service.saveRender(SheetType.General, "Thorn", 5, "<html>thorn</html>")
+          _        <- service.saveRender(SheetType.Legendary, "Tiamat", 30, "<html>tiamat</html>")
+          _        <- service.saveRender(SheetType.General, "Gimli", 5, "<html>gimli</html>")
           results  <- service.findByLevel(5)
         yield results
       }.asserting { results =>
@@ -88,7 +87,7 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
     "return empty list for non-matching level" in {
       makeService.flatMap { (service, _) =>
         for
-          _       <- service.saveRender(SheetType.General, "Thorn", 5, "{}", "<html/>")
+          _       <- service.saveRender(SheetType.General, "Thorn", 5, "<html/>")
           results <- service.findByLevel(99)
         yield results
       }.asserting { results =>
@@ -101,9 +100,9 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
     "return only records matching the sheet type" in {
       makeService.flatMap { (service, _) =>
         for
-          _       <- service.saveRender(SheetType.General, "Thorn", 5, "{}", "<html>thorn</html>")
-          _       <- service.saveRender(SheetType.Legendary, "Tiamat", 30, "{}", "<html>tiamat</html>")
-          _       <- service.saveRender(SheetType.General, "Gimli", 8, "{}", "<html>gimli</html>")
+          _       <- service.saveRender(SheetType.General, "Thorn", 5, "<html>thorn</html>")
+          _       <- service.saveRender(SheetType.Legendary, "Tiamat", 30, "<html>tiamat</html>")
+          _       <- service.saveRender(SheetType.General, "Gimli", 8, "<html>gimli</html>")
           results <- service.findBySheetType(SheetType.General)
         yield results
       }.asserting { results =>
@@ -117,7 +116,7 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
     "return empty list when no records match" in {
       makeService.flatMap { (service, _) =>
         for
-          _       <- service.saveRender(SheetType.General, "Thorn", 5, "{}", "<html/>")
+          _       <- service.saveRender(SheetType.General, "Thorn", 5, "<html/>")
           results <- service.findBySheetType(SheetType.Legendary)
         yield results
       }.asserting { results =>
@@ -130,9 +129,9 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
     "return records with partial name match" in {
       makeService.flatMap { (service, _) =>
         for
-          _       <- service.saveRender(SheetType.General, "Ogre Warchief", 8, "{}", "<html/>")
-          _       <- service.saveRender(SheetType.Legendary, "Tiamat", 30, "{}", "<html/>")
-          _       <- service.saveRender(SheetType.General, "Young Ogre", 3, "{}", "<html/>")
+          _       <- service.saveRender(SheetType.General, "Ogre Warchief", 8, "<html/>")
+          _       <- service.saveRender(SheetType.Legendary, "Tiamat", 30, "<html/>")
+          _       <- service.saveRender(SheetType.General, "Young Ogre", 3, "<html/>")
           results <- service.searchByCharacterName("Ogre")
         yield results
       }.asserting { results =>
@@ -145,7 +144,7 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
     "be case-insensitive" in {
       makeService.flatMap { (service, _) =>
         for
-          _       <- service.saveRender(SheetType.General, "Ogre Warchief", 8, "{}", "<html/>")
+          _       <- service.saveRender(SheetType.General, "Ogre Warchief", 8, "<html/>")
           results <- service.searchByCharacterName("ogre")
         yield results
       }.asserting { results =>
@@ -157,7 +156,7 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
     "return empty list when no names match" in {
       makeService.flatMap { (service, _) =>
         for
-          _       <- service.saveRender(SheetType.General, "Thorn", 5, "{}", "<html/>")
+          _       <- service.saveRender(SheetType.General, "Thorn", 5, "<html/>")
           results <- service.searchByCharacterName("Dragon")
         yield results
       }.asserting { results =>
