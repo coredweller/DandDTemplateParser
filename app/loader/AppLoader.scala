@@ -1,11 +1,12 @@
 package loader
 
 import cats.effect.unsafe.IORuntime
-import controllers.{CharacterSheetController, HealthController}
+import controllers.{CharacterSheetController, HealthController, JsonHttpErrorHandler}
 import doobie.hikari.HikariTransactor
 import play.api.ApplicationLoader.Context
 import play.api.BuiltInComponentsFromContext
 import play.api.mvc.EssentialFilter
+import play.api.OptionalSourceMapper
 import play.api.routing.Router
 import play.filters.HttpFiltersComponents
 import repositories.DoobieRenderRepository
@@ -47,6 +48,9 @@ class AppComponents(context: Context)
   private val renderer      = CharacterSheetRenderer()
   private val characterSheetService    = CharacterSheetService(renderer, renderService)
   private val characterSheetController = CharacterSheetController(characterSheetService, controllerComponents)
+
+  override lazy val httpErrorHandler =
+    JsonHttpErrorHandler(environment, configuration, OptionalSourceMapper(devContext.map(_.sourceMapper)), () => router)
 
   // Play's generated router from conf/routes
   override def router: Router =
