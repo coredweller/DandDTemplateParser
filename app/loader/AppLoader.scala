@@ -1,16 +1,16 @@
 package loader
 
 import cats.effect.unsafe.IORuntime
-import controllers.{CharacterSheetController, HealthController, TaskController}
+import controllers.{CharacterSheetController, HealthController}
 import doobie.hikari.HikariTransactor
 import play.api.ApplicationLoader.Context
 import play.api.BuiltInComponentsFromContext
 import play.api.mvc.EssentialFilter
 import play.api.routing.Router
 import play.filters.HttpFiltersComponents
-import repositories.{DoobieRenderRepository, InMemoryTaskRepository}
+import repositories.DoobieRenderRepository
 import router.Routes
-import services.{CharacterSheetRenderer, CharacterSheetService, RenderService, TaskService}
+import services.{CharacterSheetRenderer, CharacterSheetService, RenderService}
 
 import scala.concurrent.ExecutionContext
 
@@ -39,15 +39,9 @@ class AppComponents(context: Context)
 
   applicationLifecycle.addStopHook(() => closeTransactor.unsafeToFuture())
 
-  // ── Task wiring ─────────────────────────────────────────────
-  private val taskRepo: InMemoryTaskRepository =
-    InMemoryTaskRepository.make().unsafeRunSync()
-
-  private val taskService    = TaskService(taskRepo)
-  private val taskController = TaskController(taskService, controllerComponents)
+  // ── Wiring ────────────────────────────────────────────────────
   private val healthController = HealthController(controllerComponents)
 
-  // ── Character sheet wiring ──────────────────────────────────
   private val renderRepo    = DoobieRenderRepository(transactor)
   private val renderService = RenderService(renderRepo)
   private val renderer      = CharacterSheetRenderer()
@@ -56,6 +50,6 @@ class AppComponents(context: Context)
 
   // Play's generated router from conf/routes
   override def router: Router =
-    new Routes(httpErrorHandler, healthController, taskController, characterSheetController)
+    new Routes(httpErrorHandler, healthController, characterSheetController)
 
   override def httpFilters: Seq[EssentialFilter] = super.httpFilters
