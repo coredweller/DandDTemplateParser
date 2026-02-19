@@ -1,7 +1,7 @@
 package services
 
 import cats.effect.IO
-import domain.{RenderId, RenderRecord, SheetType}
+import domain.{OptionsAlreadyTakenErrorResponse, RenderId, RenderRecord, SheetType}
 import repositories.RenderRepository
 
 import java.time.Instant
@@ -13,11 +13,11 @@ final class RenderService(repo: RenderRepository):
     characterName: String,
     level:         Int,
     responseHtml:  String
-  ): IO[Either[List[String], RenderRecord]] =
+  ): IO[Either[OptionsAlreadyTakenErrorResponse, RenderRecord]] =
     repo.existsByCharacterName(characterName).flatMap {
       case true =>
         repo.searchByCharacterName(characterName)
-          .map(records => Left(records.map(_.characterName).distinct))
+          .map(records => Left(OptionsAlreadyTakenErrorResponse(records.map(_.characterName).distinct)))
       case false =>
         val now    = Instant.now()
         val record = RenderRecord(

@@ -1,7 +1,7 @@
 package controllers
 
 import cats.effect.unsafe.IORuntime
-import domain.{CharacterSheet, LegendaryCharacterSheet, RenderRecord, SheetType}
+import domain.{CharacterSheet, LegendaryCharacterSheet, OptionsAlreadyTakenErrorResponse, RenderResponse, SheetType}
 import play.api.libs.json.*
 import play.api.mvc.*
 import services.CharacterSheetService
@@ -21,11 +21,8 @@ final class CharacterSheetController(
       case JsSuccess(sheet, _) =>
         service.renderGeneral(sheet)
           .map {
-            case Left(alreadyTakenOptions) => Conflict(Json.obj(
-              "error"               -> "A character with this name already exists",
-              "alreadyTakenOptions" -> alreadyTakenOptions
-            ))
-            case Right(html) => Ok(html).as(HTML)
+            case Left(response) => Conflict(Json.toJson(response))
+            case Right(response) => Ok(Json.toJson(response))
           }
           .unsafeToFuture()
   }
@@ -37,18 +34,15 @@ final class CharacterSheetController(
       case JsSuccess(sheet, _) =>
         service.renderLegendary(sheet)
           .map {
-            case Left(alreadyTakenOptions) => Conflict(Json.obj(
-              "error"               -> "A character with this name already exists",
-              "alreadyTakenOptions" -> alreadyTakenOptions
-            ))
-            case Right(html) => Ok(html).as(HTML)
+            case Left(response) => Conflict(Json.toJson(response))
+            case Right(response) => Ok(Json.toJson(response))
           }
           .unsafeToFuture()
   }
 
   def findByLevel(level: Int): Action[AnyContent] = Action.async {
     service.findByLevel(level)
-      .map(summaries => Ok(Json.toJson(summaries)))
+      .map(responses => Ok(Json.toJson(responses)))
       .unsafeToFuture()
   }
 
@@ -58,7 +52,7 @@ final class CharacterSheetController(
         Future.successful(BadRequest(Json.obj("error" -> err)))
       case Right(st) =>
         service.findBySheetType(st)
-          .map(summaries => Ok(Json.toJson(summaries)))
+          .map(responses => Ok(Json.toJson(responses)))
           .unsafeToFuture()
   }
 
@@ -68,6 +62,6 @@ final class CharacterSheetController(
         Future.successful(BadRequest(Json.obj("error" -> JsError.toJson(errors))))
       case JsSuccess(name, _) =>
         service.searchByCharacterName(name)
-          .map(summaries => Ok(Json.toJson(summaries)))
+          .map(responses => Ok(Json.toJson(responses)))
           .unsafeToFuture()
   }

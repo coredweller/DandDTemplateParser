@@ -2,7 +2,7 @@ package services
 
 import cats.effect.{IO, Ref}
 import cats.effect.testing.scalatest.AsyncIOSpec
-import domain.{RenderRecord, SheetType}
+import domain.{OptionsAlreadyTakenErrorResponse, RenderRecord, SheetType}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AsyncWordSpec
 import repositories.RenderRepository
@@ -76,10 +76,11 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
         yield result
       }.asserting { result =>
         result shouldBe a[Left[?, ?]]
-        val names = result.swap.toOption.get
-        names should contain("Ogre")
-        names should contain("Ogre1")
-        names should contain("Ogre Titan")
+        val options = result.swap.toOption.get
+        options shouldBe a[OptionsAlreadyTakenErrorResponse]
+        options.alreadyTakenOptions should contain("Ogre")
+        options.alreadyTakenOptions should contain("Ogre1")
+        options.alreadyTakenOptions should contain("Ogre Titan")
       }
     }
 
