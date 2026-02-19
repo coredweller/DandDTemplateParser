@@ -1,6 +1,6 @@
 package controllers
 
-import play.api.{Configuration, Environment, OptionalSourceMapper, UsefulException}
+import play.api.{Configuration, Environment, Logging, OptionalSourceMapper}
 import play.api.http.DefaultHttpErrorHandler
 import play.api.mvc.Results.*
 import play.api.mvc.RequestHeader
@@ -14,10 +14,11 @@ class JsonHttpErrorHandler(
     config: Configuration,
     sourceMapper: OptionalSourceMapper,
     router: Provider[Router]
-) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
-  override def onProdServerError(request: RequestHeader, exception: UsefulException) = {
+) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) with Logging {
+  override def onProdServerError(request: RequestHeader, exception: play.api.UsefulException) = {
+    logger.error(s"Internal server error on ${request.method} ${request.uri}", exception)
     Future.successful(
-      InternalServerError("A server error occurred: " + exception.getMessage)
+      InternalServerError("Internal server error")
     )
   }
 
