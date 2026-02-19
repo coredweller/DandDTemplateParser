@@ -13,6 +13,8 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
       extends RenderRepository:
     def save(record: RenderRecord): IO[RenderRecord] =
       store.update(record :: _).as(record)
+    def existsByCharacterName(name: String): IO[Boolean] =
+      store.get.map(_.exists(_.characterName == name))
     def findByLevel(level: Int): IO[List[RenderRecord]] =
       store.get.map(_.filter(_.level == level))
     def findBySheetType(sheetType: SheetType): IO[List[RenderRecord]] =
@@ -29,13 +31,13 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
     "create a record with correct fields" in {
       makeService.flatMap { (service, _) =>
         service.saveRender(SheetType.General, "Thorn Ironforge", 5, "<html>test</html>")
-          .flatMap { record =>
-            IO.pure(record).asserting { r =>
-              r.sheetType     shouldBe SheetType.General
-              r.characterName shouldBe "Thorn Ironforge"
-              r.level         shouldBe 5
-              r.responseHtml  shouldBe "<html>test</html>"
-            }
+          .asserting { result =>
+            result shouldBe a[Right[?, ?]]
+            val r = result.toOption.get
+            r.sheetType     shouldBe SheetType.General
+            r.characterName shouldBe "Thorn Ironforge"
+            r.level         shouldBe 5
+            r.responseHtml  shouldBe "<html>test</html>"
           }
       }
     }
@@ -47,7 +49,7 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
           r2 <- service.saveRender(SheetType.Legendary, "B", 10, "<html/>")
         yield (r1, r2)
       }.asserting { (r1, r2) =>
-        r1.id should not be r2.id
+        r1.toOption.get.id should not be r2.toOption.get.id
       }
     }
 
@@ -64,6 +66,30 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
       }
     }
 
+    "return Left with fuzzy matches when character name already exists" in {
+      makeService.flatMap { (service, _) =>
+        for
+          _      <- service.saveRender(SheetType.General, "Ogre", 5, "<html/>")
+          _      <- service.saveRender(SheetType.General, "Ogre1", 5, "<html/>")
+          _      <- service.saveRender(SheetType.General, "Ogre Titan", 8, "<html/>")
+          result <- service.saveRender(SheetType.General, "Ogre", 3, "<html/>")
+        yield result
+      }.asserting { result =>
+        result shouldBe a[Left[?, ?]]
+        val names = result.swap.toOption.get
+        names should contain("Ogre")
+        names should contain("Ogre1")
+        names should contain("Ogre Titan")
+      }
+    }
+
+    "return Right when character name does not exist" in {
+      makeService.flatMap { (service, _) =>
+        service.saveRender(SheetType.General, "Thorn", 5, "<html/>")
+      }.asserting { result =>
+        result shouldBe a[Right[?, ?]]
+      }
+    }
   }
 
   "RenderService.findByLevel" should {

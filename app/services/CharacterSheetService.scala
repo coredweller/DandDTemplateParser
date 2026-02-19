@@ -8,17 +8,17 @@ final class CharacterSheetService(
   renderService: RenderService
 ):
 
-  def renderGeneral(sheet: CharacterSheet): IO[String] =
+  def renderGeneral(sheet: CharacterSheet): IO[Either[List[String], String]] =
     for
-      html <- renderer.renderHtml(sheet)
-      _    <- renderService.saveRender(SheetType.General, sheet.CharacterName, sheet.Level, html)
-    yield html
+      html   <- renderer.renderHtml(sheet)
+      result <- renderService.saveRender(SheetType.General, sheet.CharacterName, sheet.Level, html)
+    yield result.map(_ => html)
 
-  def renderLegendary(sheet: LegendaryCharacterSheet): IO[String] =
+  def renderLegendary(sheet: LegendaryCharacterSheet): IO[Either[List[String], String]] =
     for
-      html <- renderer.renderLegendaryHtml(sheet)
-      _    <- renderService.saveRender(SheetType.Legendary, sheet.CharacterName, sheet.Level, html)
-    yield html
+      html   <- renderer.renderLegendaryHtml(sheet)
+      result <- renderService.saveRender(SheetType.Legendary, sheet.CharacterName, sheet.Level, html)
+    yield result.map(_ => html)
 
   def findByLevel(level: Int): IO[List[RenderRecord]] =
     renderService.findByLevel(level)

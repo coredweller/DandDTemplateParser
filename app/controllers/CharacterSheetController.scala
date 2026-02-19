@@ -20,7 +20,13 @@ final class CharacterSheetController(
         Future.successful(BadRequest(Json.obj("error" -> JsError.toJson(errors))))
       case JsSuccess(sheet, _) =>
         service.renderGeneral(sheet)
-          .map(html => Ok(html).as(HTML))
+          .map {
+            case Left(alreadyTakenOptions) => Conflict(Json.obj(
+              "error"               -> "A character with this name already exists",
+              "alreadyTakenOptions" -> alreadyTakenOptions
+            ))
+            case Right(html) => Ok(html).as(HTML)
+          }
           .unsafeToFuture()
   }
 
@@ -30,7 +36,13 @@ final class CharacterSheetController(
         Future.successful(BadRequest(Json.obj("error" -> JsError.toJson(errors))))
       case JsSuccess(sheet, _) =>
         service.renderLegendary(sheet)
-          .map(html => Ok(html).as(HTML))
+          .map {
+            case Left(alreadyTakenOptions) => Conflict(Json.obj(
+              "error"               -> "A character with this name already exists",
+              "alreadyTakenOptions" -> alreadyTakenOptions
+            ))
+            case Right(html) => Ok(html).as(HTML)
+          }
           .unsafeToFuture()
   }
 
