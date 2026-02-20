@@ -11,9 +11,6 @@ lazy val root = (project in file("."))
     libraryDependencies ++= Seq(
       "org.typelevel"  %% "cats-core"                       % "2.12.0",
       "org.typelevel"  %% "cats-effect"                     % "3.5.4",
-      "co.fs2"         %% "fs2-core"                        % "3.11.0",
-      "io.github.iltotore" %% "iron"                        % "2.6.0",
-      "io.github.iltotore" %% "iron-cats"                   % "2.6.0",
       // Database
       "org.tpolecat"       %% "doobie-core"                  % "1.0.0-RC6",
       "org.tpolecat"       %% "doobie-hikari"                % "1.0.0-RC6",
