@@ -5,7 +5,7 @@ import domain.*
 
 final class CharacterSheetRenderer:
 
-  def renderHtml(sheet: CharacterSheet): IO[String] = IO.pure {
+  def renderHtml(sheet: CharacterSheet): IO[String] = IO.delay {
     val abilities = renderAbilityScores(sheet.abilityScores)
     val savingThrows = renderKeyValueSection("Saving Throws", sheet.savingThrows)
     val skills = renderKeyValueSection("Skills", sheet.skills)
@@ -97,7 +97,7 @@ final class CharacterSheetRenderer:
        |</html>""".stripMargin
   }
 
-  def renderLegendaryHtml(sheet: LegendaryCharacterSheet): IO[String] = IO.pure {
+  def renderLegendaryHtml(sheet: LegendaryCharacterSheet): IO[String] = IO.delay {
     val abilities = renderAbilityScores(sheet.abilityScores)
     val savingThrows = renderKeyValueSection("Saving Throws", sheet.savingThrows)
     val skills = renderKeyValueSection("Skills", sheet.skills)
