@@ -2,59 +2,68 @@ package domain
 
 import play.api.libs.json.*
 
+// PascalCase wire format for all macros in this file.
+// Special cases preserve the original template keys that PascalCase alone cannot produce.
+private given JsonConfiguration = JsonConfiguration(naming = JsonNaming {
+  case "characterClass" => "Class"
+  case "hp"             => "HP"
+  case "ac"             => "AC"
+  case s                => JsonNaming.PascalCase(s)
+})
+
 // ── Ability Score ──────────────────────────────────────────────
-case class AbilityScore(Score: Int, Modifier: String)
+case class AbilityScore(score: Int, modifier: String)
 
 object AbilityScore:
-  given Format[AbilityScore] = Json.format[AbilityScore]
+  given OFormat[AbilityScore] = Json.format[AbilityScore]
 
 // ── Ability Scores block ───────────────────────────────────────
 case class AbilityScores(
-  Strength:     AbilityScore,
-  Dexterity:    AbilityScore,
-  Constitution: AbilityScore,
-  Intelligence: AbilityScore,
-  Wisdom:       AbilityScore,
-  Charisma:     AbilityScore
+  strength:     AbilityScore,
+  dexterity:    AbilityScore,
+  constitution: AbilityScore,
+  intelligence: AbilityScore,
+  wisdom:       AbilityScore,
+  charisma:     AbilityScore
 )
 
 object AbilityScores:
-  given Format[AbilityScores] = Json.format[AbilityScores]
+  given OFormat[AbilityScores] = Json.format[AbilityScores]
 
 // ── Equipment ──────────────────────────────────────────────────
-case class Equipment(Armor: String, Weapons: String, Other: String)
+case class Equipment(armor: String, weapons: String, other: String)
 
 object Equipment:
-  given Format[Equipment] = Json.format[Equipment]
+  given OFormat[Equipment] = Json.format[Equipment]
 
 // ── Character Sheet (root model) ───────────────────────────────
 case class CharacterSheet(
-  CharacterName: String,
-  Level:         Int,
-  Race:          String,
-  Class:         String,
-  Alignment:     String,
-  HP:            String,
-  AC:            Int,
-  Speed:         String,
-  AbilityScores: AbilityScores,
-  SavingThrows:  Map[String, String],
-  Skills:        Map[String, String],
-  Senses:        String,
-  Languages:     String,
-  SpecialTraits: Map[String, String],
-  Actions:       Map[String, String],
-  Equipment:     Equipment,
-  Notes:         String
+  characterName:  String,
+  level:          Int,
+  race:           String,
+  characterClass: String,
+  alignment:      String,
+  hp:             String,
+  ac:             Int,
+  speed:          String,
+  abilityScores:  AbilityScores,
+  savingThrows:   Map[String, String],
+  skills:         Map[String, String],
+  senses:         String,
+  languages:      String,
+  specialTraits:  Map[String, String],
+  actions:        Map[String, String],
+  equipment:      Equipment,
+  notes:          String
 )
 
 object CharacterSheet:
-  given Format[CharacterSheet] = Json.format[CharacterSheet]
+  given OFormat[CharacterSheet] = Json.format[CharacterSheet]
 
 // ── Legendary Actions (nested structure) ───────────────────────
 case class LegendaryActions(
   legendaryActionUses: String,
-  Options:             Map[String, String]
+  options:             Map[String, String]
 )
 
 object LegendaryActions:
@@ -68,49 +77,49 @@ object LegendaryActions:
     Writes { la =>
       Json.obj(
         "Legendary Action Uses" -> la.legendaryActionUses,
-        "Options"               -> la.Options
+        "Options"               -> la.options
       )
     }
   )
 
 // ── Mythic Trait ───────────────────────────────────────────────
-case class MythicTrait(Name: String, Description: String)
+case class MythicTrait(name: String, description: String)
 
 object MythicTrait:
-  given Format[MythicTrait] = Json.format[MythicTrait]
+  given OFormat[MythicTrait] = Json.format[MythicTrait]
 
 // ── Legendary Character Sheet (root model) ─────────────────────
 case class LegendaryCharacterSheet(
-  CharacterName:       String,
-  Level:               Int,
-  Race:                String,
-  Class:               String,
-  Alignment:           String,
-  HP:                  String,
-  AC:                  Int,
-  Speed:               String,
-  AbilityScores:       AbilityScores,
-  SavingThrows:        Map[String, String],
-  Skills:              Map[String, String],
-  DamageResistances:   String,
-  DamageImmunities:    String,
-  ConditionImmunities: String,
-  Senses:              String,
-  Languages:           String,
-  ChallengeRating:     String,
-  ProficiencyBonus:    String,
-  SpecialTraits:       Map[String, String],
-  Actions:             Map[String, String],
-  BonusActions:        Map[String, String],
-  Reactions:           Map[String, String],
-  LegendaryTraits:     Map[String, String],
-  LegendaryActions:    LegendaryActions,
-  MythicTrait:         MythicTrait,
-  LairActions:         Map[String, String],
-  RegionalEffects:     List[String],
-  Equipment:           Equipment,
-  Notes:               String
+  characterName:       String,
+  level:               Int,
+  race:                String,
+  characterClass:      String,
+  alignment:           String,
+  hp:                  String,
+  ac:                  Int,
+  speed:               String,
+  abilityScores:       AbilityScores,
+  savingThrows:        Map[String, String],
+  skills:              Map[String, String],
+  damageResistances:   String,
+  damageImmunities:    String,
+  conditionImmunities: String,
+  senses:              String,
+  languages:           String,
+  challengeRating:     String,
+  proficiencyBonus:    String,
+  specialTraits:       Map[String, String],
+  actions:             Map[String, String],
+  bonusActions:        Map[String, String],
+  reactions:           Map[String, String],
+  legendaryTraits:     Map[String, String],
+  legendaryActions:    LegendaryActions,
+  mythicTrait:         MythicTrait,
+  lairActions:         Map[String, String],
+  regionalEffects:     List[String],
+  equipment:           Equipment,
+  notes:               String
 )
 
 object LegendaryCharacterSheet:
-  given Format[LegendaryCharacterSheet] = Json.format[LegendaryCharacterSheet]
+  given OFormat[LegendaryCharacterSheet] = Json.format[LegendaryCharacterSheet]

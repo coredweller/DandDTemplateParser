@@ -12,30 +12,30 @@ class CharacterSheetRendererSpec extends AsyncWordSpec with AsyncIOSpec with Mat
   private val renderer = CharacterSheetRenderer()
 
   private val sampleSheet = CharacterSheet(
-    CharacterName = "Thorn Ironforge",
-    Level         = 5,
-    Race          = "Dwarf",
-    Class         = "Fighter",
-    Alignment     = "Lawful Good",
-    HP            = "45",
-    AC            = 18,
-    Speed         = "25 ft.",
-    AbilityScores = AbilityScores(
-      Strength     = AbilityScore(16, "+3"),
-      Dexterity    = AbilityScore(12, "+1"),
-      Constitution = AbilityScore(14, "+2"),
-      Intelligence = AbilityScore(10, "+0"),
-      Wisdom       = AbilityScore(13, "+1"),
-      Charisma     = AbilityScore(8, "-1")
+    characterName  = "Thorn Ironforge",
+    level          = 5,
+    race           = "Dwarf",
+    characterClass = "Fighter",
+    alignment      = "Lawful Good",
+    hp             = "45",
+    ac             = 18,
+    speed          = "25 ft.",
+    abilityScores  = AbilityScores(
+      strength     = AbilityScore(16, "+3"),
+      dexterity    = AbilityScore(12, "+1"),
+      constitution = AbilityScore(14, "+2"),
+      intelligence = AbilityScore(10, "+0"),
+      wisdom       = AbilityScore(13, "+1"),
+      charisma     = AbilityScore(8, "-1")
     ),
-    SavingThrows  = Map("Strength" -> "+6", "Constitution" -> "+5"),
-    Skills        = Map("Athletics" -> "+6", "Intimidation" -> "+2"),
-    Senses        = "Darkvision 60 ft., Passive Perception 11",
-    Languages     = "Common, Dwarvish",
-    SpecialTraits = Map("Second Wind" -> "Regain 1d10+5 HP as a bonus action"),
-    Actions       = Map("Warhammer" -> "+6 to hit, 1d8+3 bludgeoning"),
-    Equipment     = Equipment(Armor = "Chain Mail", Weapons = "Warhammer, Handaxe", Other = "Explorer's Pack"),
-    Notes         = "Veteran of the Siege of Ironhold"
+    savingThrows  = Map("Strength" -> "+6", "Constitution" -> "+5"),
+    skills        = Map("Athletics" -> "+6", "Intimidation" -> "+2"),
+    senses        = "Darkvision 60 ft., Passive Perception 11",
+    languages     = "Common, Dwarvish",
+    specialTraits = Map("Second Wind" -> "Regain 1d10+5 HP as a bonus action"),
+    actions       = Map("Warhammer" -> "+6 to hit, 1d8+3 bludgeoning"),
+    equipment     = Equipment(armor = "Chain Mail", weapons = "Warhammer, Handaxe", other = "Explorer's Pack"),
+    notes         = "Veteran of the Siege of Ironhold"
   )
 
   "CharacterSheetRenderer.renderHtml" should {
@@ -92,7 +92,7 @@ class CharacterSheetRendererSpec extends AsyncWordSpec with AsyncIOSpec with Mat
     }
 
     "escape HTML in character name" in {
-      val xssSheet = sampleSheet.copy(CharacterName = "<script>alert('xss')</script>")
+      val xssSheet = sampleSheet.copy(characterName = "<script>alert('xss')</script>")
       renderer.renderHtml(xssSheet).asserting { html =>
         html should not include "<script>"
         html should include("&lt;script&gt;")
@@ -101,11 +101,11 @@ class CharacterSheetRendererSpec extends AsyncWordSpec with AsyncIOSpec with Mat
 
     "omit empty sections" in {
       val minimalSheet = sampleSheet.copy(
-        SavingThrows  = Map.empty,
-        Skills        = Map.empty,
-        SpecialTraits = Map.empty,
-        Actions       = Map.empty,
-        Notes         = ""
+        savingThrows  = Map.empty,
+        skills        = Map.empty,
+        specialTraits = Map.empty,
+        actions       = Map.empty,
+        notes         = ""
       )
       renderer.renderHtml(minimalSheet).asserting { html =>
         html should not include "Saving Throws"
@@ -156,52 +156,52 @@ class CharacterSheetRendererSpec extends AsyncWordSpec with AsyncIOSpec with Mat
           |}""".stripMargin
       )
       val sheet = templateJson.as[CharacterSheet]
-      IO.pure(sheet.CharacterName).asserting(_ shouldBe "")
+      IO.pure(sheet.characterName).asserting(_ shouldBe "")
     }
   }
 
   // ── Legendary Character Sheet ────────────────────────────────
 
   private val sampleLegendary = LegendaryCharacterSheet(
-    CharacterName       = "Tiamat, Queen of Dragons",
-    Level               = 30,
-    Race                = "Dragon God",
-    Class               = "Deity",
-    Alignment           = "Chaotic Evil",
-    HP                  = "615 (30d20+300)",
-    AC                  = 25,
-    Speed               = "60 ft., fly 120 ft.",
-    AbilityScores       = AbilityScores(
-      Strength     = AbilityScore(30, "+10"),
-      Dexterity    = AbilityScore(10, "+0"),
-      Constitution = AbilityScore(30, "+10"),
-      Intelligence = AbilityScore(26, "+8"),
-      Wisdom       = AbilityScore(26, "+8"),
-      Charisma     = AbilityScore(28, "+9")
+    characterName       = "Tiamat, Queen of Dragons",
+    level               = 30,
+    race                = "Dragon God",
+    characterClass      = "Deity",
+    alignment           = "Chaotic Evil",
+    hp                  = "615 (30d20+300)",
+    ac                  = 25,
+    speed               = "60 ft., fly 120 ft.",
+    abilityScores       = AbilityScores(
+      strength     = AbilityScore(30, "+10"),
+      dexterity    = AbilityScore(10, "+0"),
+      constitution = AbilityScore(30, "+10"),
+      intelligence = AbilityScore(26, "+8"),
+      wisdom       = AbilityScore(26, "+8"),
+      charisma     = AbilityScore(28, "+9")
     ),
-    SavingThrows        = Map("STR" -> "+19", "DEX" -> "+9", "WIS" -> "+17"),
-    Skills              = Map("Arcana" -> "+17", "Perception" -> "+26", "Religion" -> "+17"),
-    DamageResistances   = "bludgeoning, piercing, slashing from nonmagical attacks",
-    DamageImmunities    = "acid, cold, fire, lightning, poison",
-    ConditionImmunities = "blinded, charmed, frightened, poisoned, stunned",
-    Senses              = "darkvision 240 ft., truesight 120 ft., passive Perception 36",
-    Languages           = "Common, Draconic, Infernal, telepathy 120 ft.",
-    ChallengeRating     = "30",
-    ProficiencyBonus    = "+9",
-    SpecialTraits       = Map("Legendary Resistance (5/Day)" -> "If Tiamat fails a saving throw, she can choose to succeed instead."),
-    Actions             = Map("Bite" -> "+19 to hit, 4d6+10 piercing plus 4d6 acid"),
-    BonusActions        = Map("Chromatic Surge" -> "Exhale a burst of elemental energy"),
-    Reactions           = Map("Reactive Heads" -> "Tiamat can take up to five reactions per round"),
-    LegendaryTraits     = Map("Legendary Resistance (5/Day)" -> "Choose to succeed a failed saving throw"),
-    LegendaryActions    = LegendaryActions(
+    savingThrows        = Map("STR" -> "+19", "DEX" -> "+9", "WIS" -> "+17"),
+    skills              = Map("Arcana" -> "+17", "Perception" -> "+26", "Religion" -> "+17"),
+    damageResistances   = "bludgeoning, piercing, slashing from nonmagical attacks",
+    damageImmunities    = "acid, cold, fire, lightning, poison",
+    conditionImmunities = "blinded, charmed, frightened, poisoned, stunned",
+    senses              = "darkvision 240 ft., truesight 120 ft., passive Perception 36",
+    languages           = "Common, Draconic, Infernal, telepathy 120 ft.",
+    challengeRating     = "30",
+    proficiencyBonus    = "+9",
+    specialTraits       = Map("Legendary Resistance (5/Day)" -> "If Tiamat fails a saving throw, she can choose to succeed instead."),
+    actions             = Map("Bite" -> "+19 to hit, 4d6+10 piercing plus 4d6 acid"),
+    bonusActions        = Map("Chromatic Surge" -> "Exhale a burst of elemental energy"),
+    reactions           = Map("Reactive Heads" -> "Tiamat can take up to five reactions per round"),
+    legendaryTraits     = Map("Legendary Resistance (5/Day)" -> "Choose to succeed a failed saving throw"),
+    legendaryActions    = LegendaryActions(
       legendaryActionUses = "5",
-      Options = Map("Bite Attack" -> "Tiamat makes a bite attack", "Wing Attack (2)" -> "Tiamat beats her wings")
+      options = Map("Bite Attack" -> "Tiamat makes a bite attack", "Wing Attack (2)" -> "Tiamat beats her wings")
     ),
-    MythicTrait         = MythicTrait("Chromatic Rebirth", "When Tiamat is reduced to 0 HP, she regains all HP and each head ignites."),
-    LairActions         = Map("Magma Eruption" -> "Magma erupts from the ground in a 20-foot radius"),
-    RegionalEffects     = List("Draconic storms of acid, lightning, and fire rage within 6 miles", "Creatures within 1 mile feel an overwhelming sense of dread"),
-    Equipment           = Equipment(Armor = "Natural Armor", Weapons = "Five Chromatic Heads", Other = "—"),
-    Notes               = "The five-headed queen of evil dragonkind"
+    mythicTrait         = MythicTrait("Chromatic Rebirth", "When Tiamat is reduced to 0 HP, she regains all HP and each head ignites."),
+    lairActions         = Map("Magma Eruption" -> "Magma erupts from the ground in a 20-foot radius"),
+    regionalEffects     = List("Draconic storms of acid, lightning, and fire rage within 6 miles", "Creatures within 1 mile feel an overwhelming sense of dread"),
+    equipment           = Equipment(armor = "Natural Armor", weapons = "Five Chromatic Heads", other = "—"),
+    notes               = "The five-headed queen of evil dragonkind"
   )
 
   "CharacterSheetRenderer.renderLegendaryHtml" should {
@@ -266,7 +266,7 @@ class CharacterSheetRendererSpec extends AsyncWordSpec with AsyncIOSpec with Mat
     }
 
     "omit mythic trait when empty" in {
-      val noMythic = sampleLegendary.copy(MythicTrait = MythicTrait("", ""))
+      val noMythic = sampleLegendary.copy(mythicTrait = MythicTrait("", ""))
       renderer.renderLegendaryHtml(noMythic).asserting { html =>
         html should not include "Mythic Trait"
       }
@@ -274,9 +274,9 @@ class CharacterSheetRendererSpec extends AsyncWordSpec with AsyncIOSpec with Mat
 
     "show dash for empty defense fields" in {
       val noDefenses = sampleLegendary.copy(
-        DamageResistances = "",
-        DamageImmunities = "",
-        ConditionImmunities = ""
+        damageResistances   = "",
+        damageImmunities    = "",
+        conditionImmunities = ""
       )
       renderer.renderLegendaryHtml(noDefenses).asserting { html =>
         // empty fields render as "—"
@@ -350,6 +350,6 @@ class CharacterSheetRendererSpec extends AsyncWordSpec with AsyncIOSpec with Mat
           |}""".stripMargin
       )
       val sheet = templateJson.as[LegendaryCharacterSheet]
-      IO.pure(sheet.LegendaryActions.legendaryActionUses).asserting(_ shouldBe "3")
+      IO.pure(sheet.legendaryActions.legendaryActionUses).asserting(_ shouldBe "3")
     }
   }

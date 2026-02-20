@@ -6,18 +6,18 @@ import domain.*
 final class CharacterSheetRenderer:
 
   def renderHtml(sheet: CharacterSheet): IO[String] = IO.pure {
-    val abilities = renderAbilityScores(sheet.AbilityScores)
-    val savingThrows = renderKeyValueSection("Saving Throws", sheet.SavingThrows)
-    val skills = renderKeyValueSection("Skills", sheet.Skills)
-    val specialTraits = renderKeyValueSection("Special Traits", sheet.SpecialTraits)
-    val actions = renderKeyValueSection("Actions", sheet.Actions)
+    val abilities = renderAbilityScores(sheet.abilityScores)
+    val savingThrows = renderKeyValueSection("Saving Throws", sheet.savingThrows)
+    val skills = renderKeyValueSection("Skills", sheet.skills)
+    val specialTraits = renderKeyValueSection("Special Traits", sheet.specialTraits)
+    val actions = renderKeyValueSection("Actions", sheet.actions)
 
     s"""<!DOCTYPE html>
        |<html lang="en">
        |<head>
        |  <meta charset="UTF-8">
        |  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-       |  <title>${escapeHtml(sheet.CharacterName)} — Character Sheet</title>
+       |  <title>${escapeHtml(sheet.characterName)} — Character Sheet</title>
        |  <style>
        |    ${css}
        |  </style>
@@ -25,27 +25,27 @@ final class CharacterSheetRenderer:
        |<body>
        |  <div class="sheet">
        |    <header class="header">
-       |      <h1 class="char-name">${escapeHtml(sheet.CharacterName)}</h1>
+       |      <h1 class="char-name">${escapeHtml(sheet.characterName)}</h1>
        |      <div class="header-details">
-       |        <span class="badge">Level ${sheet.Level}</span>
-       |        <span class="badge">${escapeHtml(sheet.Race)}</span>
-       |        <span class="badge">${escapeHtml(sheet.Class)}</span>
-       |        <span class="badge">${escapeHtml(sheet.Alignment)}</span>
+       |        <span class="badge">Level ${sheet.level}</span>
+       |        <span class="badge">${escapeHtml(sheet.race)}</span>
+       |        <span class="badge">${escapeHtml(sheet.characterClass)}</span>
+       |        <span class="badge">${escapeHtml(sheet.alignment)}</span>
        |      </div>
        |    </header>
        |
        |    <section class="combat-stats">
        |      <div class="stat-box">
        |        <div class="stat-label">HP</div>
-       |        <div class="stat-value">${escapeHtml(sheet.HP)}</div>
+       |        <div class="stat-value">${escapeHtml(sheet.hp)}</div>
        |      </div>
        |      <div class="stat-box">
        |        <div class="stat-label">AC</div>
-       |        <div class="stat-value">${sheet.AC}</div>
+       |        <div class="stat-value">${sheet.ac}</div>
        |      </div>
        |      <div class="stat-box">
        |        <div class="stat-label">Speed</div>
-       |        <div class="stat-value">${escapeHtml(sheet.Speed)}</div>
+       |        <div class="stat-value">${escapeHtml(sheet.speed)}</div>
        |      </div>
        |    </section>
        |
@@ -62,11 +62,11 @@ final class CharacterSheetRenderer:
        |    <section class="info-row">
        |      <div class="info-block">
        |        <h3>Senses</h3>
-       |        <p>${escapeHtml(sheet.Senses)}</p>
+       |        <p>${escapeHtml(sheet.senses)}</p>
        |      </div>
        |      <div class="info-block">
        |        <h3>Languages</h3>
-       |        <p>${escapeHtml(sheet.Languages)}</p>
+       |        <p>${escapeHtml(sheet.languages)}</p>
        |      </div>
        |    </section>
        |
@@ -78,45 +78,45 @@ final class CharacterSheetRenderer:
        |      <div class="equipment-grid">
        |        <div class="equip-item">
        |          <h3>Armor</h3>
-       |          <p>${escapeHtml(sheet.Equipment.Armor)}</p>
+       |          <p>${escapeHtml(sheet.equipment.armor)}</p>
        |        </div>
        |        <div class="equip-item">
        |          <h3>Weapons</h3>
-       |          <p>${escapeHtml(sheet.Equipment.Weapons)}</p>
+       |          <p>${escapeHtml(sheet.equipment.weapons)}</p>
        |        </div>
        |        <div class="equip-item">
        |          <h3>Other</h3>
-       |          <p>${escapeHtml(sheet.Equipment.Other)}</p>
+       |          <p>${escapeHtml(sheet.equipment.other)}</p>
        |        </div>
        |      </div>
        |    </section>
        |
-       |    ${renderNotes(sheet.Notes)}
+       |    ${renderNotes(sheet.notes)}
        |  </div>
        |</body>
        |</html>""".stripMargin
   }
 
   def renderLegendaryHtml(sheet: LegendaryCharacterSheet): IO[String] = IO.pure {
-    val abilities = renderAbilityScores(sheet.AbilityScores)
-    val savingThrows = renderKeyValueSection("Saving Throws", sheet.SavingThrows)
-    val skills = renderKeyValueSection("Skills", sheet.Skills)
-    val specialTraits = renderKeyValueSection("Special Traits", sheet.SpecialTraits)
-    val actions = renderKeyValueSection("Actions", sheet.Actions)
-    val bonusActions = renderKeyValueSection("Bonus Actions", sheet.BonusActions)
-    val reactions = renderKeyValueSection("Reactions", sheet.Reactions)
-    val legendaryTraits = renderKeyValueSection("Legendary Traits", sheet.LegendaryTraits)
-    val legendaryActions = renderLegendaryActions(sheet.LegendaryActions)
-    val mythicTrait = renderMythicTrait(sheet.MythicTrait)
-    val lairActions = renderKeyValueSection("Lair Actions", sheet.LairActions)
-    val regionalEffects = renderListSection("Regional Effects", sheet.RegionalEffects)
+    val abilities = renderAbilityScores(sheet.abilityScores)
+    val savingThrows = renderKeyValueSection("Saving Throws", sheet.savingThrows)
+    val skills = renderKeyValueSection("Skills", sheet.skills)
+    val specialTraits = renderKeyValueSection("Special Traits", sheet.specialTraits)
+    val actions = renderKeyValueSection("Actions", sheet.actions)
+    val bonusActions = renderKeyValueSection("Bonus Actions", sheet.bonusActions)
+    val reactions = renderKeyValueSection("Reactions", sheet.reactions)
+    val legendaryTraits = renderKeyValueSection("Legendary Traits", sheet.legendaryTraits)
+    val legendaryActions = renderLegendaryActions(sheet.legendaryActions)
+    val mythicTrait = renderMythicTrait(sheet.mythicTrait)
+    val lairActions = renderKeyValueSection("Lair Actions", sheet.lairActions)
+    val regionalEffects = renderListSection("Regional Effects", sheet.regionalEffects)
 
     s"""<!DOCTYPE html>
        |<html lang="en">
        |<head>
        |  <meta charset="UTF-8">
        |  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-       |  <title>${escapeHtml(sheet.CharacterName)} — Legendary Character Sheet</title>
+       |  <title>${escapeHtml(sheet.characterName)} — Legendary Character Sheet</title>
        |  <style>
        |    ${css}
        |    ${legendaryCss}
@@ -125,29 +125,29 @@ final class CharacterSheetRenderer:
        |<body>
        |  <div class="sheet legendary">
        |    <header class="header">
-       |      <h1 class="char-name">${escapeHtml(sheet.CharacterName)}</h1>
+       |      <h1 class="char-name">${escapeHtml(sheet.characterName)}</h1>
        |      <div class="header-details">
-       |        <span class="badge">Level ${sheet.Level}</span>
-       |        <span class="badge">${escapeHtml(sheet.Race)}</span>
-       |        <span class="badge">${escapeHtml(sheet.Class)}</span>
-       |        <span class="badge">${escapeHtml(sheet.Alignment)}</span>
-       |        <span class="badge legendary-badge">CR ${escapeHtml(sheet.ChallengeRating)}</span>
-       |        <span class="badge">Prof ${escapeHtml(sheet.ProficiencyBonus)}</span>
+       |        <span class="badge">Level ${sheet.level}</span>
+       |        <span class="badge">${escapeHtml(sheet.race)}</span>
+       |        <span class="badge">${escapeHtml(sheet.characterClass)}</span>
+       |        <span class="badge">${escapeHtml(sheet.alignment)}</span>
+       |        <span class="badge legendary-badge">CR ${escapeHtml(sheet.challengeRating)}</span>
+       |        <span class="badge">Prof ${escapeHtml(sheet.proficiencyBonus)}</span>
        |      </div>
        |    </header>
        |
        |    <section class="combat-stats">
        |      <div class="stat-box">
        |        <div class="stat-label">HP</div>
-       |        <div class="stat-value">${escapeHtml(sheet.HP)}</div>
+       |        <div class="stat-value">${escapeHtml(sheet.hp)}</div>
        |      </div>
        |      <div class="stat-box">
        |        <div class="stat-label">AC</div>
-       |        <div class="stat-value">${sheet.AC}</div>
+       |        <div class="stat-value">${sheet.ac}</div>
        |      </div>
        |      <div class="stat-box">
        |        <div class="stat-label">Speed</div>
-       |        <div class="stat-value">${escapeHtml(sheet.Speed)}</div>
+       |        <div class="stat-value">${escapeHtml(sheet.speed)}</div>
        |      </div>
        |    </section>
        |
@@ -164,20 +164,20 @@ final class CharacterSheetRenderer:
        |    <section class="defenses">
        |      <h2>Defenses</h2>
        |      <div class="defense-grid">
-       |        ${renderDefenseBlock("Damage Resistances", sheet.DamageResistances)}
-       |        ${renderDefenseBlock("Damage Immunities", sheet.DamageImmunities)}
-       |        ${renderDefenseBlock("Condition Immunities", sheet.ConditionImmunities)}
+       |        ${renderDefenseBlock("Damage Resistances", sheet.damageResistances)}
+       |        ${renderDefenseBlock("Damage Immunities", sheet.damageImmunities)}
+       |        ${renderDefenseBlock("Condition Immunities", sheet.conditionImmunities)}
        |      </div>
        |    </section>
        |
        |    <section class="info-row">
        |      <div class="info-block">
        |        <h3>Senses</h3>
-       |        <p>${escapeHtml(sheet.Senses)}</p>
+       |        <p>${escapeHtml(sheet.senses)}</p>
        |      </div>
        |      <div class="info-block">
        |        <h3>Languages</h3>
-       |        <p>${escapeHtml(sheet.Languages)}</p>
+       |        <p>${escapeHtml(sheet.languages)}</p>
        |      </div>
        |    </section>
        |
@@ -200,20 +200,20 @@ final class CharacterSheetRenderer:
        |      <div class="equipment-grid">
        |        <div class="equip-item">
        |          <h3>Armor</h3>
-       |          <p>${escapeHtml(sheet.Equipment.Armor)}</p>
+       |          <p>${escapeHtml(sheet.equipment.armor)}</p>
        |        </div>
        |        <div class="equip-item">
        |          <h3>Weapons</h3>
-       |          <p>${escapeHtml(sheet.Equipment.Weapons)}</p>
+       |          <p>${escapeHtml(sheet.equipment.weapons)}</p>
        |        </div>
        |        <div class="equip-item">
        |          <h3>Other</h3>
-       |          <p>${escapeHtml(sheet.Equipment.Other)}</p>
+       |          <p>${escapeHtml(sheet.equipment.other)}</p>
        |        </div>
        |      </div>
        |    </section>
        |
-       |    ${renderNotes(sheet.Notes)}
+       |    ${renderNotes(sheet.notes)}
        |  </div>
        |</body>
        |</html>""".stripMargin
@@ -221,18 +221,18 @@ final class CharacterSheetRenderer:
 
   private def renderAbilityScores(a: AbilityScores): String =
     val scores = List(
-      ("STR", a.Strength),
-      ("DEX", a.Dexterity),
-      ("CON", a.Constitution),
-      ("INT", a.Intelligence),
-      ("WIS", a.Wisdom),
-      ("CHA", a.Charisma)
+      ("STR", a.strength),
+      ("DEX", a.dexterity),
+      ("CON", a.constitution),
+      ("INT", a.intelligence),
+      ("WIS", a.wisdom),
+      ("CHA", a.charisma)
     )
     scores.map { (label, ab) =>
       s"""<div class="ability-card">
          |  <div class="ability-label">$label</div>
-         |  <div class="ability-score">${ab.Score}</div>
-         |  <div class="ability-mod">${escapeHtml(ab.Modifier)}</div>
+         |  <div class="ability-score">${ab.score}</div>
+         |  <div class="ability-mod">${escapeHtml(ab.modifier)}</div>
          |</div>""".stripMargin
     }.mkString("\n")
 
@@ -271,7 +271,7 @@ final class CharacterSheetRenderer:
        |</div>""".stripMargin
 
   private def renderLegendaryActions(la: LegendaryActions): String =
-    val optionRows = la.Options.map { (k, v) =>
+    val optionRows = la.options.map { (k, v) =>
       s"""<tr><td class="kv-key">${escapeHtml(k)}</td><td class="kv-val">${escapeHtml(v)}</td></tr>"""
     }.mkString("\n")
     s"""<section class="kv-section">
@@ -281,13 +281,13 @@ final class CharacterSheetRenderer:
        |</section>""".stripMargin
 
   private def renderMythicTrait(mt: MythicTrait): String =
-    if mt.Name.isBlank && mt.Description.isBlank then ""
+    if mt.name.isBlank && mt.description.isBlank then ""
     else
       s"""<section class="mythic-trait">
          |  <h2>Mythic Trait</h2>
          |  <div class="mythic-card">
-         |    <h3>${escapeHtml(mt.Name)}</h3>
-         |    <p>${escapeHtml(mt.Description)}</p>
+         |    <h3>${escapeHtml(mt.name)}</h3>
+         |    <p>${escapeHtml(mt.description)}</p>
          |  </div>
          |</section>""".stripMargin
 

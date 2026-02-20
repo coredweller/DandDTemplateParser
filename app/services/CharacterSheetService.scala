@@ -12,13 +12,13 @@ final class CharacterSheetService(
   def renderGeneral(sheet: CharacterSheet): IO[Either[OptionsAlreadyTakenErrorResponse, RenderResponse]] =
     for
       html   <- renderer.renderHtml(sheet)
-      result <- renderService.saveRender(SheetType.General, sheet.CharacterName, sheet.Level, html)
+      result <- renderService.saveRender(SheetType.General, sheet.characterName, sheet.level, html)
     yield result.map(_.toResponse)
 
   def renderLegendary(sheet: LegendaryCharacterSheet): IO[Either[OptionsAlreadyTakenErrorResponse, RenderResponse]] =
     for
       html   <- renderer.renderLegendaryHtml(sheet)
-      result <- renderService.saveRender(SheetType.Legendary, sheet.CharacterName, sheet.Level, html)
+      result <- renderService.saveRender(SheetType.Legendary, sheet.characterName, sheet.level, html)
     yield result.map(_.toResponse)
 
   def findByLevel(level: Int): IO[List[RenderResponse]] =
