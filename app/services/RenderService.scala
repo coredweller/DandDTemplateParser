@@ -4,6 +4,7 @@ import cats.effect.IO
 import domain.{OptionsAlreadyTakenErrorResponse, RenderId, RenderRecord, SheetType}
 import repositories.RenderRepository
 
+import java.sql.SQLIntegrityConstraintViolationException
 import java.time.Instant
 
 final class RenderService(repo: RenderRepository):
@@ -14,21 +15,20 @@ final class RenderService(repo: RenderRepository):
     level:         Int,
     responseHtml:  String
   ): IO[Either[OptionsAlreadyTakenErrorResponse, RenderRecord]] =
-    repo.existsByCharacterName(characterName).flatMap {
-      case true =>
+    val record = RenderRecord(
+      id            = RenderId.generate(),
+      sheetType     = sheetType,
+      characterName = characterName,
+      level         = level,
+      responseHtml  = responseHtml,
+      createdAt     = Instant.now()
+    )
+    repo.save(record).map(Right(_)).handleErrorWith {
+      case _: SQLIntegrityConstraintViolationException =>
         repo.searchByCharacterName(characterName)
           .map(records => Left(OptionsAlreadyTakenErrorResponse(records.map(_.characterName).distinct)))
-      case false =>
-        val now    = Instant.now()
-        val record = RenderRecord(
-          id            = RenderId.generate(),
-          sheetType     = sheetType,
-          characterName = characterName,
-          level         = level,
-          responseHtml  = responseHtml,
-          createdAt     = now
-        )
-        repo.save(record).map(Right(_))
+      case other =>
+        IO.raiseError(other)
     }
 
   def findByLevel(level: Int): IO[List[RenderRecord]] =

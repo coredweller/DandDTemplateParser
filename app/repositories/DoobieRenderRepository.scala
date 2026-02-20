@@ -25,10 +25,6 @@ final class DoobieRenderRepository(xa: Transactor[IO]) extends RenderRepository:
   private given Meta[Instant] =
     Meta[java.sql.Timestamp].imap(_.toInstant)(java.sql.Timestamp.from)
 
-  def existsByCharacterName(name: String): IO[Boolean] =
-    sql"SELECT COUNT(*) FROM character_sheet_renders WHERE character_name = $name"
-      .query[Int].unique.map(_ > 0).transact(xa)
-
   def searchByCharacterName(query: String): IO[List[RenderRecord]] =
     val pattern = s"%$query%"
     sql"""SELECT id, sheet_type, character_name, level, response_html, created_at

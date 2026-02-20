@@ -12,9 +12,14 @@ class RenderServiceSpec extends AsyncWordSpec with AsyncIOSpec with Matchers:
   private class InMemoryRenderRepository(store: Ref[IO, List[RenderRecord]])
       extends RenderRepository:
     def save(record: RenderRecord): IO[RenderRecord] =
-      store.update(record :: _).as(record)
-    def existsByCharacterName(name: String): IO[Boolean] =
-      store.get.map(_.exists(_.characterName == name))
+      store.modify { records =>
+        if records.exists(_.characterName == record.characterName) then
+          (records, IO.raiseError(new java.sql.SQLIntegrityConstraintViolationException(
+            s"Duplicate entry '${record.characterName}' for key 'uq_character_name'"
+          )))
+        else
+          (record :: records, IO.pure(record))
+      }.flatten
     def findByLevel(level: Int): IO[List[RenderRecord]] =
       store.get.map(_.filter(_.level == level))
     def findBySheetType(sheetType: SheetType): IO[List[RenderRecord]] =

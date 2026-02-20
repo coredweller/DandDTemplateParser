@@ -29,16 +29,23 @@ class AppComponents(context: Context)
 
   // ── Database ────────────────────────────────────────────────
   private val dbConfig = configuration.get[play.api.Configuration]("db.default")
-  private val (transactor, closeTransactor) =
-    HikariTransactor.newHikariTransactor[cats.effect.IO](
-      driverClassName = dbConfig.get[String]("driver"),
-      url             = dbConfig.get[String]("url"),
-      user            = dbConfig.get[String]("username"),
-      pass            = dbConfig.get[String]("password"),
-      connectEC       = executionContext
-    ).allocated.unsafeRunSync()
-
-  applicationLifecycle.addStopHook(() => closeTransactor.unsafeToFuture())
+  private val transactor: HikariTransactor[cats.effect.IO] = {
+    val (xa, release) =
+      HikariTransactor.newHikariTransactor[cats.effect.IO](
+        driverClassName = dbConfig.get[String]("driver"),
+        url             = dbConfig.get[String]("url"),
+        user            = dbConfig.get[String]("username"),
+        pass            = dbConfig.get[String]("password"),
+        connectEC       = executionContext
+      ).allocated.unsafeRunSync()
+    try
+      applicationLifecycle.addStopHook(() => release.unsafeToFuture())
+      xa
+    catch
+      case ex: Throwable =>
+        release.unsafeRunSync()
+        throw ex
+  }
 
   // ── Wiring ────────────────────────────────────────────────────
   private val healthController = HealthController(controllerComponents)
