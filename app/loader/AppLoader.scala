@@ -14,6 +14,7 @@ import router.Routes
 import services.{CharacterSheetRenderer, CharacterSheetService, RenderService}
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.*
 
 class AppLoader extends play.api.ApplicationLoader:
   def load(context: Context): play.api.Application =
@@ -27,6 +28,9 @@ class AppComponents(context: Context)
   given IORuntime = IORuntime.global
   given ExecutionContext = executionContext
 
+  private val dbExecutionContext: ExecutionContext =
+    actorSystem.dispatchers.lookup("contexts.database")
+
   // ── Database ────────────────────────────────────────────────
   private val dbConfig = configuration.get[play.api.Configuration]("db.default")
   private val transactor: HikariTransactor[cats.effect.IO] = {
@@ -36,8 +40,10 @@ class AppComponents(context: Context)
         url             = dbConfig.get[String]("url"),
         user            = dbConfig.get[String]("username"),
         pass            = dbConfig.get[String]("password"),
-        connectEC       = executionContext
-      ).allocated.unsafeRunSync()
+        connectEC       = dbExecutionContext
+      ).allocated
+        .timeout(30.seconds)
+        .unsafeRunSync()
     try
       applicationLifecycle.addStopHook(() => release.unsafeToFuture())
       xa
